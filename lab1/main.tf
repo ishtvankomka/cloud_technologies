@@ -14,11 +14,12 @@ module "lambda_api" {
   source        = "../modules/lambda-api"
   function_name = module.naming.id
   handler       = "index.handler"
-  lambda_zip    = "${path.module}../lambda-api.zip"
   context       = module.naming.context
+  code_path     = "${path.module}/function"
+  output_path   = "${path.module}/lambda_api.zip"
 }
 
 resource "aws_iam_role_policy_attachment" "test-attach" {
-  role       = aws_iam_role.role.name
+  role       = module.lambda_api.role_name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }

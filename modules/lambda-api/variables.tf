@@ -1,14 +1,16 @@
 variable "function_name" {
-  type        = string
   description = "Lambda function's name."
 }
 
-variable "lambda_zip" {
-  description = "Deployment package location."
+variable "code_path" {
+  description = "Function path"
+}
+
+variable "output_path" {
+  description = "Zip path"
 }
 
 variable "handler" {
-  default     = ""
   description = "Function entrypoint."
 }
 
