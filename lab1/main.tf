@@ -11,15 +11,26 @@ module "courses_table" {
 }
 
 module "lambda_api" {
-  source        = "../modules/lambda-api"
-  function_name = module.naming.id
+  source = "../modules/lambda-api"
+
+  function_name = format("courses-%v", module.naming.id)
   handler       = "index.handler"
-  context       = module.naming.context
   code_path     = "${path.module}/function"
   output_path   = "${path.module}/lambda_api.zip"
+  context       = module.naming.context
+  table_arn     = module.courses_table.table_arn
+
+  env_var = {
+    TABLE_NAME = module.courses_table.table_name
+  }
+
+  policy_file = data.template_file.crud_policy_authors.rendered
+  depends_on  = [null_resource.create_lambda]
 }
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
-  role       = module.lambda_api.role_name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+resource "null_resource" "create_lambda" {
+  provisioner "local-exec" {
+    command = "cd function && npm i && zip -r ../lambda_api.zip ."
+  }
 }
+

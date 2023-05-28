@@ -10,16 +10,54 @@ module "courses_table" {
   context    = module.naming.context
 }
 
-module "lambda_api" {
-  source        = "../modules/lambda-api"
-  function_name = module.naming.id
+module "authors_lambda" {
+  source = "../modules/lambda-api"
+
+  function_name = format("authors-%v", module.naming.id)
   handler       = "index.handler"
-  context       = module.naming.context
   code_path     = "${path.module}/function"
   output_path   = "${path.module}/lambda_api.zip"
+  context       = module.naming.context
+  table_arn     = module.authors_table.table_arn
+
+  env_var = {
+    TABLE_NAME = module.authors_table.table_name
+  }
+
+  policy_file = data.template_file.crud_policy_authors.rendered
+  depends_on  = [null_resource.create_lambda]
 }
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
-  role       = module.lambda_api.role_name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+module "courses_lambda" {
+  source = "../modules/lambda-api"
+
+  function_name = format("courses-%v", module.naming.id)
+  handler       = "index.handler"
+  code_path     = "${path.module}/function"
+  output_path   = "${path.module}/lambda_api.zip"
+  context       = module.naming.context
+  table_arn     = module.courses_table.table_arn
+
+  env_var = {
+    TABLE_NAME = module.courses_table.table_name
+  }
+
+  policy_file = data.template_file.crud_policy_courses.rendered
+  depends_on  = [null_resource.create_lambda]
+}
+
+resource "null_resource" "create_lambda" {
+  provisioner "local-exec" {
+    command = "cd function && npm i && zip -r ../lambda_api.zip ."
+  }
+}
+
+module "api_gw" {
+  source = "../modules/apigw"
+
+  context                = module.naming.context
+  db_path_part           = [lower(module.courses_table.table_name), lower(module.authors_table.table_name)]
+  lambdas_invocation_arn = [module.courses_lambda.invocation_arn, module.authors_lambda.invocation_arn]
+
+  depends_on = [module.authors_lambda, module.courses_lambda]
 }

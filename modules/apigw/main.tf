@@ -1,5 +1,6 @@
 resource "aws_api_gateway_rest_api" "lambda_api" {
   name = module.labels.id
+
   endpoint_configuration {
     types = ["REGIONAL"]
   }

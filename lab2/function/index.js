@@ -1,4 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+//const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 import {
   DynamoDBDocumentClient,
   ScanCommand,
@@ -47,7 +48,7 @@ export const handler = async (event, context) => {
         break;
       case "GET /items":
         body = await dynamo.send(
-          new ScanCommand({ TableName: tableName })
+          new ScanCommand({ TableName: 'tableName' })
         );
         body = body.Items;
         break;
