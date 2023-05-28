@@ -1,30 +1,26 @@
 resource "aws_api_gateway_rest_api" "lambda_api" {
-  name = "${var.name}-api"
-
+  name = module.labels.id
   endpoint_configuration {
     types = ["REGIONAL"]
   }
 }
 
 resource "aws_api_gateway_resource" "db_paths" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   parent_id   = aws_api_gateway_rest_api.lambda_api.root_resource_id
   path_part   = var.db_path_part[count.index]
 }
 
 resource "aws_api_gateway_resource" "crud_paths" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   parent_id   = aws_api_gateway_resource.db_paths[count.index].id
   path_part   = "items"
 }
 
 resource "aws_api_gateway_method" "get_items" {
-  count = length(var.db_path_part)
-
+  count         = length(var.db_path_part)
   rest_api_id   = aws_api_gateway_rest_api.lambda_api.id
   resource_id   = aws_api_gateway_resource.crud_paths[count.index].id
   http_method   = "GET"
@@ -32,8 +28,7 @@ resource "aws_api_gateway_method" "get_items" {
 }
 
 resource "aws_api_gateway_integration" "get_items_integration" {
-  count = length(var.db_path_part)
-
+  count                   = length(var.db_path_part)
   rest_api_id             = aws_api_gateway_rest_api.lambda_api.id
   resource_id             = aws_api_gateway_resource.crud_paths[count.index].id
   http_method             = aws_api_gateway_method.get_items[count.index].http_method
@@ -52,8 +47,7 @@ resource "aws_api_gateway_integration" "get_items_integration" {
 }
 
 resource "aws_api_gateway_method_response" "get_items_integration_response" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.crud_paths[count.index].id
   http_method = aws_api_gateway_method.get_items[count.index].http_method
@@ -61,8 +55,7 @@ resource "aws_api_gateway_method_response" "get_items_integration_response" {
 }
 
 resource "aws_api_gateway_method" "put_items" {
-  count = length(var.db_path_part)
-
+  count         = length(var.db_path_part)
   rest_api_id   = aws_api_gateway_rest_api.lambda_api.id
   resource_id   = aws_api_gateway_resource.crud_paths[count.index].id
   http_method   = "PUT"
@@ -70,8 +63,7 @@ resource "aws_api_gateway_method" "put_items" {
 }
 
 resource "aws_api_gateway_integration" "put_items_integration" {
-  count = length(var.db_path_part)
-
+  count                   = length(var.db_path_part)
   rest_api_id             = aws_api_gateway_rest_api.lambda_api.id
   resource_id             = aws_api_gateway_resource.crud_paths[count.index].id
   http_method             = aws_api_gateway_method.put_items[count.index].http_method
@@ -81,8 +73,7 @@ resource "aws_api_gateway_integration" "put_items_integration" {
 }
 
 resource "aws_api_gateway_method_response" "put_items_integration_response" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.crud_paths[count.index].id
   http_method = aws_api_gateway_method.put_items[count.index].http_method
@@ -90,17 +81,14 @@ resource "aws_api_gateway_method_response" "put_items_integration_response" {
 }
 
 resource "aws_api_gateway_resource" "by_id" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   parent_id   = aws_api_gateway_resource.crud_paths[count.index].id
   path_part   = "{id}"
-
 }
 
 resource "aws_api_gateway_method" "get_item_by_id" {
-  count = length(var.db_path_part)
-
+  count         = length(var.db_path_part)
   rest_api_id   = aws_api_gateway_rest_api.lambda_api.id
   resource_id   = aws_api_gateway_resource.by_id[count.index].id
   http_method   = "GET"
@@ -108,8 +96,7 @@ resource "aws_api_gateway_method" "get_item_by_id" {
 }
 
 resource "aws_api_gateway_integration" "get_item_by_id_integration" {
-  count = length(var.db_path_part)
-
+  count                   = length(var.db_path_part)
   rest_api_id             = aws_api_gateway_rest_api.lambda_api.id
   resource_id             = aws_api_gateway_resource.by_id[count.index].id
   http_method             = aws_api_gateway_method.get_items[count.index].http_method
@@ -128,8 +115,7 @@ resource "aws_api_gateway_integration" "get_item_by_id_integration" {
 }
 
 resource "aws_api_gateway_method_response" "get_item_by_id_integration_response" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.by_id[count.index].id
   http_method = aws_api_gateway_method.get_item_by_id[count.index].http_method
@@ -137,8 +123,7 @@ resource "aws_api_gateway_method_response" "get_item_by_id_integration_response"
 }
 
 resource "aws_api_gateway_method" "delete_item" {
-  count = length(var.db_path_part)
-
+  count         = length(var.db_path_part)
   rest_api_id   = aws_api_gateway_rest_api.lambda_api.id
   resource_id   = aws_api_gateway_resource.by_id[count.index].id
   http_method   = "DELETE"
@@ -146,8 +131,7 @@ resource "aws_api_gateway_method" "delete_item" {
 }
 
 resource "aws_api_gateway_integration" "delete_item_integration" {
-  count = length(var.db_path_part)
-
+  count                   = length(var.db_path_part)
   rest_api_id             = aws_api_gateway_rest_api.lambda_api.id
   resource_id             = aws_api_gateway_resource.by_id[count.index].id
   http_method             = aws_api_gateway_method.delete_item[count.index].http_method
@@ -166,8 +150,7 @@ resource "aws_api_gateway_integration" "delete_item_integration" {
 }
 
 resource "aws_api_gateway_method_response" "delete_item_integration_response" {
-  count = length(var.db_path_part)
-
+  count       = length(var.db_path_part)
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.by_id[count.index].id
   http_method = aws_api_gateway_method.delete_item[count.index].http_method
