@@ -1,8 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "labs-back"
+    profile        = "default"
+    bucket         = "ishtvan-lab-backend"
     key            = "lab3/terraform.tfstate"
     region         = "eu-west-1"
-    dynamodb_table = "labs-back-lab1"
+    dynamodb_table = "ishtvan-lab-backend-lab3"
   }
 }

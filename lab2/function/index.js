@@ -1,5 +1,4 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-//const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 import {
   DynamoDBDocumentClient,
   ScanCommand,
@@ -9,11 +8,8 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({});
-
 const dynamo = DynamoDBDocumentClient.from(client);
-
 const tableName = process.env.TABLE_NAME;
-
 
 export const handler = async (event, context) => {
   let body;

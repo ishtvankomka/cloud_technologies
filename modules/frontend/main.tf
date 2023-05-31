@@ -1,3 +1,16 @@
+resource "aws_s3_bucket_public_access_block" "allow_all" {
+  bucket                  = aws_s3_bucket.frontend_bucket.id
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket" "frontend_bucket" {
+  bucket = "${module.labels.id}-frontend"
+  tags   = module.labels.tags
+}
+
 resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
   bucket = aws_s3_bucket.frontend_bucket.id
 
@@ -19,17 +32,16 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
       ]
     }
     EOF
+
+  depends_on = [aws_s3_bucket_public_access_block.allow_all]
 }
 
-resource "aws_s3_bucket" "frontend_bucket" {
-  bucket = "${module.labels.id}-frontend"
-  tags   = module.labels.tags
-}
-
-resource "aws_s3_object" "frontend" {
-  bucket = aws_s3_bucket.frontend_bucket.id
-  key    = var.object_name
-  source = var.path_to_file
+resource "aws_s3_bucket_object" "frontend" {
+  for_each     = var.files
+  bucket       = aws_s3_bucket.frontend_bucket.id
+  key          = each.value
+  source       = each.value
+  content_type = "text/html"
 }
 
 resource "aws_s3_bucket_website_configuration" "frontend" {
